@@ -1,0 +1,31 @@
+
+body {
+	font-family: Verdana, sans-serif;
+	font-size: 9pt;
+}
+
+h2 {
+	font-family: Trebuchet MS;
+	font-size: 11pt;
+	margin-top: 2em;
+}
+
+table, th, tr, td {
+	/* font-family: Verdana, sans-serif; */
+	font-size: 9pt;
+	vertical-align: top;
+	text-align: left;
+}
+
+th {
+	width: 150px;
+}
+
+.ui-widget-header, .ui-widget-content {
+	padding: 1ex;
+	padding-left: 1em;
+}
+
+.ui-widget-header {
+	color: black;
+}

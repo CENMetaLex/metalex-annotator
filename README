@@ -1,0 +1,57 @@
+MetaLex Annotator
+Copyright (c) 2011 by Rinke Hoekstra, Universiteit van Amsterdam
+====
+
+@author: Rinke Hoekstra
+@contact: hoekstra@uva.nl
+@organization: Universiteit van Amsterdam
+@version: 0.1
+@status: beta
+@website: http://doc.metalex.eu
+@copyright: 2011, Rinke Hoekstra, Universiteit van Amsterdam
+
+@license: MetaLex Annotator is free software, you can redistribute it and/or modify
+it under the terms of GNU Affero General Public License
+as published by the Free Software Foundation, either version 3
+of the License, or (at your option) any later version.
+
+You should have received a copy of the the GNU Affero
+General Public License, along with MetaLex Converter. If not, see
+
+
+Additional permission under the GNU Affero GPL version 3 section 7:
+
+If you modify this Program, or any covered work, by linking or
+combining it with other code, such other code is not for that reason
+alone subject to any of the requirements of the GNU Affero GPL
+version 3.
+
+====
+This is a set of Python scripts for:
+1. Extracting concepts from Dutch legislative texts in CEN MetaLex
+2. Representing these concepts as RDF SKOS concept instances.
+3. Annotating these texts with these concepts
+4. Linking these concepts to Cornetto Wordnet
+5. Identifying definitions in Dutch legislative texts in CEN MetaLex (alpha version)
+6. Representing these definitions as RDF (not yet implemented)
+7. Uploading the RDF representations to a triple store
+
+
+====
+How to get things going:
+
+* Install Python 2.7 for your OS
+* Install Python setuptools (for easy_install)
+
+* Install rdflib from http://www.rdflib.net
+  - (run 'easy_install -U "rdflib>=3.0.0"')
+
+* Install nltk
+  - (run 'easy_install nltk')
+  
+* Initialize a training and test set
+  - Edit 'generate_evaluation_sets.py' to point to a repository of CEN MetaLex files.
+  - Run 'python generate_evaluation_sets.py
+  
+* Run 'python parse.py'
+

@@ -143,14 +143,9 @@ def process():
     
     training_set = pickle.load(open('training_set.pickle','r'))
     
-    count = 0
-    pos = 2
     indexed_definitions = {}
     for (id,t) in training_set :
         count = count + 1
-        if count > pos : 
-            break
-        print id
         definitions = annotator.annotate(id, t)
     
         indexed_definitions[id] = {}

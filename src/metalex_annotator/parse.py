@@ -6,13 +6,13 @@ Created on 27 Apr 2011
 '''
 
 from annotate import Annotator
-from xml.etree.ElementTree import ElementTree
 import csv
 from cornetto.linker import ConceptLinker
 from definition.matcher import DefinitionMatcher
 from string import Template
-import regex
 import pickle
+import sys
+import regex
 
 
 
@@ -88,7 +88,7 @@ def write_definition_report(indexed_definitions, definitions):
     for id, deftextdict in indexed_definitions.items():
         
         docid, docstring = prettify_id(id)
-        f.write("<h1>{}</h1>".format(docstring))
+        f.write("<h2>{}</h2>".format(docstring))
         f.write("<p>{}</p>".format(deftextdict['text'].encode('utf-8')))
         for d in deftextdict['definitions'] :
             
@@ -138,18 +138,22 @@ def write_concepts_to_rdf():
     print "Done"    
     
     
-def process():
+def process(picklefile):
     annotator = Annotator()
     
-    training_set = pickle.load(open('training_set.pickle','r'))
+    training_set = pickle.load(open(picklefile,'r'))
     
     indexed_definitions = {}
     for (id,t) in training_set :
-        definitions = annotator.annotate(id, t)
-    
-        indexed_definitions[id] = {}
-        indexed_definitions[id]['text'] = t
-        indexed_definitions[id]['definitions'] = definitions
+        try :
+            definitions = annotator.annotate(id, t)
+        
+            indexed_definitions[id] = {}
+            indexed_definitions[id]['text'] = t
+            indexed_definitions[id]['definitions'] = definitions
+        except KeyboardInterrupt:
+            print "Annotation aborted on {0}".format(id)
+            break
          
 
     
@@ -160,7 +164,26 @@ def process():
 
 
 if __name__ == '__main__' :
-    definitions, annotator, indexed_definitions = process()
+    if len(sys.argv) > 1:
+        if '--full' in sys.argv :
+            definitions, annotator, indexed_definitions = process('full_set.pickle')
+        if '--train' in sys.argv :
+            definitions, annotator, indexed_definitions = process('training_set.pickle')
+        if '--test' in sys.argv :
+            definitions, annotator, indexed_definitions = process('test_set.pickle')
+    else :
+        print """MetaLex Annotator v0.1a 
+Copyright (c) 2011, Rinke Hoekstra, Universiteit van Amsterdam
+Licensed under the AGPL v3 (see http://www.gnu.org/licenses/agpl-3.0.txt)
+        
+
+        Usage:
+        python parse.py --full|train|test
+        
+    Make sure to run 'generate_evaluation_sets.py' first!"""
+        
+        quit()
+        
     
     write_concept_scores(annotator)
     

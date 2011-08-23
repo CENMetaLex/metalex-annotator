@@ -274,7 +274,7 @@ class DefinitionMatcher:
     d8_term_head = r"{SCOPE}?({PUNC}.*)?{WORDT}{VOORTS}?{MOD}?{ALS}{TERM}{VOORTS}?{AANGEW}{PUNC}".format(SCOPE=SCOPE,PUNC=PUNC,WORDT=WORDT,VOORTS=VOORTS,MOD=MOD,ALS=ALS,TERM=TERM,AANGEW=AANGEW)
     d8_short_tail = r"{INDEX}{DEF}{SCOLPUNC}".format(INDEX=INDEX,DEF=DEF,SCOLPUNC=SCOLPUNC)
 
-    # ... wordt voorts als [term] aangemerkt: a. [def]; b. [def]
+    # ... wordt voorts met [term] gelijkgesteld: a. [def]; b. [def]
     d8a_term_head = r"{SCOPE}?({PUNC}.*)?{WORDT}{VOORTS}?{MOD}?{MET}{TERM}{VOORTS}?{GELIJKGESTELD}{PUNC}".format(SCOPE=SCOPE,PUNC=PUNC,WORDT=WORDT,VOORTS=VOORTS,MOD=MOD,MET=MET,TERM=TERM,GELIJKGESTELD=GELIJKGESTELD)
     d8a_short_tail = r"{INDEX}{DEF}{SCOLPUNC}".format(INDEX=INDEX,DEF=DEF,SCOLPUNC=SCOLPUNC)
 
@@ -392,6 +392,10 @@ class DefinitionMatcher:
                        '14a': "term head: {}<br/>short tail: {}".format(escape(d14a_term_head), escape(d14a_short_tail)),
                        '15': escape(d15),
     }
+    
+    
+    
+    ## En hier worden dus de reguliere expressies losgelaten op de tekst van een artikel.
     
     def match(self, id, tagged_text):
         definitions = []

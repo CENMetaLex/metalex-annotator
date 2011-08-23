@@ -4,6 +4,7 @@ from cornetto.linker import ConceptLinker
 from definition.matcher import DefinitionMatcher
 from util import Util
 from parser import Parser
+from sys import stdout
 import math
 
 class Annotator():
@@ -84,39 +85,41 @@ class Annotator():
         
         return concepts
                 
-    def process(self, id, text):
+    def annotate(self, id, text):
+        print "== Annotating {} ==".format(id)
+        print "Tokenizing..."
         tokenized = self.parser.tokenizeText(text)
+        print "Tagging..."
         tagged = self.parser.tagText(tokenized)
+        print "Parsing..."
         parsed = self.parser.parseText(tagged)
         
+        stdout.write("Scanning for definitions...")
         dm = DefinitionMatcher()
-        
         definitions_for_id = dm.match(id, tagged)
-        
+        stdout.write(" {} found.\n".format(len(definitions_for_id)))
         self.definitions.extend(definitions_for_id)
-
-
-#        print "===\n{}\n===\n".format(text.encode('utf-8'))
-#        for s in parsed :
-#            self.counter += 1
-#            print "\n=== Sentence {} ===\n".format(self.counter)
-#            print unicode(s.pprint()).encode('utf-8')
-#            print "\n===\n"
-#            
-#        print "=== Concepts ===\n"
             
+        stdout.write("Extracting concepts...")
         concepts = Util.extractConcepts(parsed)
-
-#        concepts.extend(self.getConcepts(self.definitions))
-
-#        self.indexConcepts(id, concepts)
+        stdout.write(" {} found.\n".format(len(concepts)))
         
-#        cl = ConceptLinker()
-#        cl.link(id, concepts)
+#        NB: This does not currently work, as the concepts from definitions should be in a dictionary      
+#        stdout.write("Appending concepts from definitions to concept list...")
+#        concepts.extend(self.getConcepts(self.definitions))
+#        stdout.write(" {} total.\n".format(len(definitions_for_id)))
 
+        if len(concepts) < 1 :
+            print "No concepts found..."
+        else :
+            print "Adding concepts to index..."
+            self.indexConcepts(id, concepts)
+            print "Linking concepts to Cornetto Wordnet..."
+            cl = ConceptLinker()
+            cl.link(id, concepts)
 
-#        print "=== NEXT ===\n\n"
-        return concepts, tokenized, tagged, parsed, definitions_for_id
+        print "=== NEXT ===\n\n"
+        return definitions_for_id
 
 
 

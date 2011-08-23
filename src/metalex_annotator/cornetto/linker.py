@@ -57,9 +57,7 @@ class ConceptLinker:
     def findMatches(self, term, term_uri, nouns):
         print "Finding close matches for '{}' ({})".format(term, term_uri)
 
-        self.graph.add((URIRef(term_uri), self.SKOS['prefLabel'], Literal(term)))
-        self.graph.add((URIRef(term_uri), RDF.type, self.MC['Concept']))
-        self.graph.add((URIRef(term_uri), self.SKOS['inScheme'], URIRef(self.target_scheme)))
+
         
         self.graph.commit()
         
@@ -68,7 +66,7 @@ class ConceptLinker:
         self.graph.commit()
 
         if len(nouns) > 1 :
-            print "Finding related matches for '{}' ({})".format(term, term_uri)
+            print "Finding broader matches for '{}' ({})".format(term, term_uri)
             for t in nouns :
                 try:
                     try :
@@ -77,14 +75,14 @@ class ConceptLinker:
                         print "Error in minting URI for noun {}: {}".format(term, e)
                         break
                     
-                    self.graph.add((URIRef(term_uri), self.SKOS['related'], URIRef(t_uri)))
+                    self.graph.add((term_uri, self.SKOS['broader'], t_uri))
                     
                     if not(t in self.visited) :
                         t = t.encode('utf-8')
                         print "Finding close matches for '{}' ({})".format(t, t_uri)
-                        self.graph.add((URIRef(t_uri), self.SKOS['prefLabel'], Literal(t)))
-                        self.graph.add((URIRef(t_uri), RDF.type, self.MC['Term']))
-                        self.graph.add((URIRef(t_uri), self.SKOS['inScheme'], URIRef(self.target_scheme)))     
+                        self.graph.add((t_uri, self.SKOS['prefLabel'], Literal(t)))
+                        self.graph.add((t_uri, RDF.type, self.MC['Term']))
+                        self.graph.add((t_uri, self.SKOS['inScheme'], URIRef(self.target_scheme)))     
                         
                         self.graph.commit()
                                            
@@ -123,7 +121,7 @@ class ConceptLinker:
     
     def mintURI(self, term):
         term_underscored = term.replace(' ','_')
-        term_encoded = urllib.quote(term_underscored.encode('utf-8'))
+        term_encoded = urllib.quote(term_underscored)
         return self.MC[term_encoded]
 
             
@@ -135,38 +133,44 @@ class ConceptLinker:
     def link(self, metalex_id, nps):
         print "\n\nMetaLex Element URI: {}".format(metalex_id)
         for np in nps :
-            
-            if np['concept'] != '':
+            term = np['concept'].encode('utf-8')
+            if term != '':
                 try :
+                    
                     try :
-                        np_uri = self.mintURI(np['concept'])
+                        term_uri = self.mintURI(term)
                     except Exception as e:
                         print "Error in minting URI for concept {}: {}".format(np['concept'], e)
                         break
                         
                     # Add a dcterms:subject relation between Metalex identifier and noun phrase
-                    self.graph.add((URIRef(metalex_id), self.DCTERMS['subject'], URIRef(np_uri)))
+                    self.graph.add((URIRef(metalex_id), self.DCTERMS['subject'], term_uri))
+                    self.graph.add((term_uri, self.SKOS['prefLabel'], Literal(term)))
+                    self.graph.add((term_uri, RDF.type, self.MC['Concept']))
+                    self.graph.add((term_uri, self.SKOS['inScheme'], URIRef(self.target_scheme)))
+                    self.graph.add((URIRef(metalex_id), RDF.type, self.SKOS['Collection']))
+                    self.graph.add((URIRef(metalex_id), self.SKOS['member'], term_uri))
                     
                     self.graph.commit()
                     
                     for other_np in nps :
-                        if other_np['concept'].encode('utf-8') != '' and np['concept'].encode('utf-8') != other_np['concept'].encode('utf-8') :
-                            other_np_uri = self.mintURI(other_np['concept'])
-    #                            print "{} cooccurs with {}".format(np_uri, other_np_uri)
-                            self.graph.add((URIRef(np_uri), self.MC['cooccursWith'], URIRef(other_np_uri)))
+                        if other_np['concept'].encode('utf-8') != '' and term != other_np['concept'].encode('utf-8') :
+                            other_np_uri = self.mintURI(other_np['concept'].encode('utf-8'))
+    #                            print "{} cooccurs with {}".format(term_uri, other_np_uri)
+                            self.graph.add((term_uri, self.MC['cooccursWith'], URIRef(other_np_uri)))
                     
                     self.graph.commit()
                     
                     # If the noun phrase has not yet been encountered before, try to match it to Cornetto concepts
-                    if not(np['concept'] in self.visited):
-                        self.findMatches(np['concept'], np_uri, np['nouns'])
+                    if not(term in self.visited):
+                        self.findMatches(term, term_uri, np['nouns'])
                         self.graph.commit()
                 except Exception as e :
-                    print "Problem in adding matches for concept {}: {}".format(np['concept'].encode('utf-8'), e)
+                    print "Problem in adding matches for concept {}: {}".format(term, e)
 
         
         self.graph.commit()
                     
                     
-    def serialize(self, flags=None):
-        return self.graph.serialize(flags)
+    def serialize(self, destination=None):
+        return self.graph.serialize(destination, format='turtle')

@@ -49,6 +49,10 @@ How to get things going:
 * Install nltk
   - (run 'easy_install nltk')
   
+* Intialize a triple store, and set the proper URL for its SPARQL endpoint in 'cornetto.linker.py'
+
+* Upload Cornetto Wordnet RDF triples to the triple store (see http://semanticweb.cs.vu.nl/europeana/home)
+  
 * Initialize a training and test set
   - Edit 'generate_evaluation_sets.py' to point to a repository of CEN MetaLex files.
   - Run 'python generate_evaluation_sets.py

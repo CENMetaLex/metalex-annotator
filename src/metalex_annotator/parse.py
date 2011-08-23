@@ -145,7 +145,6 @@ def process():
     
     indexed_definitions = {}
     for (id,t) in training_set :
-        count = count + 1
         definitions = annotator.annotate(id, t)
     
         indexed_definitions[id] = {}

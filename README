@@ -38,7 +38,7 @@ This is a set of Python scripts for:
 
 
 ====
-How to get things going:
+# How to get things going:
 
 * Install Python 2.7 for your OS
 * Install Python setuptools (for easy_install)
@@ -48,6 +48,12 @@ How to get things going:
 
 * Install nltk
   - (run 'easy_install nltk')
+
+* Install regex
+  - (run 'easy_install regex')
+
+* Install SPARQLWrapper
+  - (run 'easy_install sparqlwrapper')
   
 * Intialize a triple store, and set the proper URL for its SPARQL endpoint in 'cornetto.linker.py' (currently works with ClioPatria)
 

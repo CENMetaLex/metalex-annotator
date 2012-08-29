@@ -13,6 +13,7 @@ from string import Template
 import pickle
 import sys
 import regex
+import locale
 
 
 
@@ -110,25 +111,25 @@ def write_definition_report(indexed_definitions, definitions):
     
     
 def write_concept_scores(a):
+    locale.setlocale(locale.LC_NUMERIC,'NL_nl')
+    
     nps_writer = csv.writer(open('nps_by_doc.csv', 'wb'), delimiter=';')
-    nps_writer.writerow(['ID','NP','TF','TFIDF'])
+    nps_writer.writerow(['Document ID','Noun Phrase','TC','TF','IDF','MAX TC in Doc','TFIDF','Total Docs','Docs with NP'])
     
     print "Writing to nps_by_doc.csv"
     for doc in a.tfidf['docs'] :
         doc_string = doc
         for term in a.tfidf['docs'][doc] :
-            nps_writer.writerow([doc_string,term.encode('UTF-8'), a.tfidf['docs'][doc][term]['tf'], a.tfidf['docs'][doc][term]['tfidf']])
-            doc_string = ''
+            nps_writer.writerow([doc_string,term.encode('UTF-8'), a.tfidf['docs'][doc][term]['tc'], locale.str(a.tfidf['docs'][doc][term]['tf']), locale.str(a.tfidf['docs'][doc][term]['idf']), a.tfidf['docs'][doc][term]['max'], locale.str(a.tfidf['docs'][doc][term]['tfidf']), a.tfidf['docs'][doc][term]['dc'], a.tfidf['docs'][doc][term]['ndc']])
             
     nps_writer = csv.writer(open('docs_by_np.csv', 'wb'), delimiter=';')
-    nps_writer.writerow(['NP','ID','TF','TFIDF'])
+    nps_writer.writerow(['Noun Phrase','Document ID','TC','TF','IDF','MAX TC in Doc','TFIDF','Total Docs','Docs with NP'])
     
     print "Writing to docs_by_np.csv"
     for term in a.tfidf['nps'] :
         term_string = term
         for doc in a.tfidf['nps'][term] :
-            nps_writer.writerow([term_string.encode('UTF-8'),doc.encode('UTF-8'), a.tfidf['nps'][term][doc]['tf'], a.tfidf['nps'][term][doc]['tfidf']])
-            term_string = ''
+            nps_writer.writerow([term_string.encode('UTF-8'),doc.encode('UTF-8'), a.tfidf['nps'][term][doc]['tc'], locale.str(a.tfidf['nps'][term][doc]['tf']), locale.str(a.tfidf['nps'][term][doc]['idf']), a.tfidf['nps'][term][doc]['max'], locale.str(a.tfidf['nps'][term][doc]['tfidf']), a.tfidf['nps'][term][doc]['dc'], a.tfidf['nps'][term][doc]['ndc']])
     print "Done"
     
 def write_concepts_to_rdf():
@@ -189,7 +190,7 @@ Licensed under the AGPL v3 (see http://www.gnu.org/licenses/agpl-3.0.txt)
     
     write_definition_report(indexed_definitions, definitions)
     
-    write_concepts_to_rdf()
+#    write_concepts_to_rdf()
 
 
 

@@ -24,13 +24,13 @@ class Parser():
 
     def __init__(self):
         if not os.path.isfile('tagger.pickle') :
-            
+            print "Training tagger..."
 #            train_sents = alpino.tagged_sents()
             train_sents = conll2002.tagged_sents('ned.train')
 #            train_sents = conll2002.chunked_sents('ned.train')
             
             word_patterns = [ (r'\d+\.\d+\w?', 'Ref'),
-                             (r'\d+\:\d+\w?', 'Ref')
+                             (r'\d+\:\d+\w?', 'Ref'),
                              (r'\d+\w', 'Ref'),  
                              (r'\d+/\d+/eg', 'Ref'),
                              (r'^(18|19|20)\d\d$', 'Year'),
@@ -43,7 +43,6 @@ class Parser():
                              (r'^;$', 'Punc'),
                              (r'^[a-zA-Z]+\d+$','Ref'),
                              (r'^\w\w+$', 'N') ]
-            
             
             raubt_tagger = self.backoff_tagger(train_sents, [nltk.tag.AffixTagger,
             nltk.tag.UnigramTagger, nltk.tag.BigramTagger, nltk.tag.TrigramTagger],

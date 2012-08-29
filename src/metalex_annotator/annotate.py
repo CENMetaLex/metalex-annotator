@@ -45,38 +45,69 @@ class Annotator():
                     self.np_itf[np][id] = 1 
                 
     def scoreConcepts(self):
-
+        # Get the total number of documents
         doc_count = len(self.np_tf.keys())
+        
         self.tfidf['count'] = doc_count
         self.tfidf['nps'] = {}
         self.tfidf['docs'] = {}
+        # For every noun phrase in the inverse term frequency dictionary
         for np in self.np_itf :
+            # Get the total number of documents (articles) in which this noun phrase occurs 
             np_total_doc_count = len(self.np_itf[np].keys())
+            
+            # Calculate the inverse document frequency (IDF) as the natural logarithm of the total 
+            # number of documents divided by the number of documents containing this noun phrase
             idf = math.log(float(doc_count)/float(np_total_doc_count))
+            print np,idf
+            
+            # Initialise the TFIDF for this noun phrase
             self.tfidf['nps'][np] = {}
             
+            # For every document in which this noun phrase occurs
             for doc_id in self.np_itf[np] :
+                # Initialise the TFIDF per noun phrase for this document
                 self.tfidf['nps'][np][doc_id] = {}
                 
+                # Initialise the TFIDF per document
                 if not doc_id in self.tfidf['docs'].keys() :
                     self.tfidf['docs'][doc_id] = {}
-                    
+                
+                # Initialise the TFIDF per document for this noun phrase
                 self.tfidf['docs'][doc_id][np] = {}
                 
+                # Get the number of times this noun phrase occurs in the document
                 np_occ_count = self.np_itf[np][doc_id]
                 
-                other_np_count = 0
+                # Get the count for the noun phrase that occurs the most in this document.
+                max_np_count = 0
                 for onp in self.np_tf[doc_id] :
-                    other_np_count += self.np_tf[doc_id][onp]
+                    if self.np_tf[doc_id][onp] > max_np_count :
+                        max_np_count = self.np_tf[doc_id][onp]
                 
-                tf = float(np_occ_count) / float(other_np_count)
+
+                # Calculate the normalized term frequency as the number of times the noun phrase occurs, divided by the maximum 
+                # number of times any noun phrase occurs in this document
+                tf = float(np_occ_count) / float(max_np_count)
                 
+                # Calculate TFIDF
                 tfidf = tf*idf
 
+                self.tfidf['nps'][np][doc_id]['tc'] = np_occ_count
                 self.tfidf['nps'][np][doc_id]['tf'] = tf
+                self.tfidf['nps'][np][doc_id]['idf'] = idf
+                self.tfidf['nps'][np][doc_id]['max'] = max_np_count
                 self.tfidf['nps'][np][doc_id]['tfidf'] = tfidf
+                self.tfidf['nps'][np][doc_id]['dc'] = doc_count
+                self.tfidf['nps'][np][doc_id]['ndc'] = np_total_doc_count
+                
+                self.tfidf['docs'][doc_id][np]['tc'] = np_occ_count
                 self.tfidf['docs'][doc_id][np]['tf'] = tf
-                self.tfidf['docs'][doc_id][np]['tfidf'] = tfidf           
+                self.tfidf['docs'][doc_id][np]['idf'] = idf
+                self.tfidf['docs'][doc_id][np]['max'] = max_np_count
+                self.tfidf['docs'][doc_id][np]['tfidf'] = tfidf          
+                self.tfidf['docs'][doc_id][np]['dc'] = doc_count
+                self.tfidf['docs'][doc_id][np]['ndc'] = np_total_doc_count 
                 
     def getConcepts(self, definitions):
         concepts = []
@@ -114,9 +145,9 @@ class Annotator():
         else :
             print "Adding concepts to index..."
             self.indexConcepts(id, concepts)
-            print "Linking concepts to Cornetto Wordnet..."
-            cl = ConceptLinker()
-            cl.link(id, concepts)
+#            print "Linking concepts to Cornetto Wordnet..."
+#            cl = ConceptLinker()
+#            cl.link(id, concepts)
 
         print "=== NEXT ===\n\n"
         return definitions_for_id

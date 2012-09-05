@@ -62,5 +62,5 @@ This is a set of Python scripts for:
 * Initialize a full set and a training and test set
   - Run 'python generate_evaluation_sets.py [path-to-metalex-files]'
   
-* Run 'python parse.py -full'
+* Run 'python parse.py --full'
 

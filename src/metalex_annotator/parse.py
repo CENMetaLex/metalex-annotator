@@ -16,6 +16,8 @@ import regex
 import locale
 from util import Util
 from nltk.tree import Tree
+import argparse
+import os
 
 
 
@@ -30,11 +32,13 @@ def prettify_id(id):
     docstring = docstring.rstrip(', ')
     return docid, docstring
 
-def write_definition_report(indexed_definitions, definitions):
-    def_writer = csv.writer(open('definitions.csv', 'wb'), delimiter=';')
+def write_definition_report(indexed_definitions, definitions, outprefix):
+    fn = "{}_definitions.csv".format(outprefix)
+    fn_html = "{}_definitions.html".format(outprefix)
+    def_writer = csv.writer(open(fn, 'wb'), delimiter=';')
     def_writer.writerow(['ID','Type','Scope','Concept','Modifier', 'Def','Context'])
     
-    print "Writing to definitions.csv"
+    print "Writing to {}".format(fn)
     for d in definitions :
         (id, type, scope, concept, modifier, definition, context) = d
         def_writer.writerow([id.encode('UTF-8'),type.encode('UTF-8'),scope.encode('UTF-8'),concept.encode('UTF-8'),modifier.encode('UTF-8'),definition.encode('UTF-8'),context.encode('UTF-8')])
@@ -62,8 +66,8 @@ def write_definition_report(indexed_definitions, definitions):
         </div>
     </div>""")
 
-    print "Writing to definitions.html"
-    f = open("definitions.html","w")
+    print "Writing to {}".format(fn_html)
+    f = open(fn_html,"w")
     f.write("""<html>
         <head>
             <title>Definities</title>
@@ -112,13 +116,15 @@ def write_definition_report(indexed_definitions, definitions):
     f.close()
     
     
-def write_concept_scores(a):
+def write_concept_scores(a, outprefix):
     locale.setlocale(locale.LC_NUMERIC,'NL_nl')
     
-    nps_writer = csv.writer(open('nps_by_doc.csv', 'wb'), delimiter=';')
+    npbdfn = "{}_nps_by_doc.csv".format(outprefix)
+    dbnpfn = "{}_docs_by_np.csv".format(outprefix)
+    nps_writer = csv.writer(open(npbdfn, 'wb'), delimiter=';')
     nps_writer.writerow(['Document ID','Noun Phrase','TC','TF','IDF','MAX TC in Doc','TFIDF','Total Docs','Docs with NP'])
     
-    print "Writing to nps_by_doc.csv"
+    print "Writing to {}".format(npbdfn)
     for doc in a.tfidf['docs'] :
         doc_string = doc
         for term in a.tfidf['docs'][doc] :
@@ -127,18 +133,19 @@ def write_concept_scores(a):
     nps_writer = csv.writer(open('docs_by_np.csv', 'wb'), delimiter=';')
     nps_writer.writerow(['Noun Phrase','Document ID','TC','TF','IDF','MAX TC in Doc','TFIDF','Total Docs','Docs with NP'])
     
-    print "Writing to docs_by_np.csv"
+    print "Writing to {}".format(dbnpfn)
     for term in a.tfidf['nps'] :
         term_string = term
         for doc in a.tfidf['nps'][term] :
             nps_writer.writerow([term_string.encode('UTF-8'),doc.encode('UTF-8'), a.tfidf['nps'][term][doc]['tc'], locale.str(a.tfidf['nps'][term][doc]['tf']), locale.str(a.tfidf['nps'][term][doc]['idf']), a.tfidf['nps'][term][doc]['max'], locale.str(a.tfidf['nps'][term][doc]['tfidf']), a.tfidf['nps'][term][doc]['dc'], a.tfidf['nps'][term][doc]['ndc']])
     print "Done"
     
-def write_parse_log(parse_log):
-    parse_log_writer = csv.writer(open('parse_log.csv','wb'), delimiter=';')
+def write_parse_log(parse_log,outprefix):
+    plfn = "{}_parse_log.csv".format(outprefix)
+    parse_log_writer = csv.writer(open(plfn,'wb'), delimiter=';')
     parse_log_writer.writerow(['Docuent ID','Parsed Text'])
     
-    print "Writing to parse_log.csv"
+    print "Writing to {}".format(plfn)
     for doc in parse_log :
         for tree in parse_log[doc] :
             ttext = tree.pprint()
@@ -146,10 +153,11 @@ def write_parse_log(parse_log):
     
     print "Done"
     
-def write_concepts_to_rdf():
+def write_concepts_to_rdf(outprefix):
+    cfn = "{}_concepts.ttl".format(outprefix)
     cl = ConceptLinker()
-    print "Writing to concepts.ttl"
-    cl.serialize(destination='concepts.ttl')
+    print "Writing to {}".format(cfn)
+    cl.serialize(destination=cfn)
     print "Done"    
     
     
@@ -180,34 +188,41 @@ def process(picklefile):
 
 
 if __name__ == '__main__' :
-    if len(sys.argv) > 1:
-        if '--full' in sys.argv :
-            definitions, annotator, indexed_definitions = process('full_set.pickle')
-        if '--train' in sys.argv :
-            definitions, annotator, indexed_definitions = process('training_set.pickle')
-        if '--test' in sys.argv :
-            definitions, annotator, indexed_definitions = process('test_set.pickle')
-    else :
-        print """MetaLex Annotator v0.1a 
-Copyright (c) 2011, Rinke Hoekstra, Universiteit van Amsterdam
-Licensed under the AGPL v3 (see http://www.gnu.org/licenses/agpl-3.0.txt)
-        
+    parser = argparse.ArgumentParser(description='MetaLex Annotator v0.1a')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--full', action='store_true',help='Run on the complete set')
+    group.add_argument('--train', action='store_true',help='Run only on the training set')
+    group.add_argument('--test', action='store_true',help='Run only on the test set')
+    group.add_argument('--file', help='Load a custom pickle file, containing a list of ID/Text tuples')
+    
+    args = parser.parse_args()
 
-        Usage:
-        python parse.py --full|train|test
-        
-    Make sure to run 'generate_evaluation_sets.py' first!"""
+    if args.full :
+        definitions, annotator, indexed_definitions = process('full_set.pickle')
+        outprefix = "full"
+    elif args.train :
+        definitions, annotator, indexed_definitions = process('training_set.pickle')
+        outprefix = "train"
+    elif args.test :
+        definitions, annotator, indexed_definitions = process('test_set.pickle')
+        outprefix = "test"
+    elif args.file :
+        (a,b) = os.path.split(args.file)
+        (outprefix,ext) = os.path.splitext(b)
+        definitions, annotator, indexed_definitions = process(args.file)
+    else :
+        parser.print_help()
         
         quit()
         
     
-    write_concept_scores(annotator)
+    write_concept_scores(annotator,outprefix)
     
-    write_definition_report(indexed_definitions, definitions)
+    write_definition_report(indexed_definitions, definitions,outprefix)
     
-    write_parse_log(annotator.parse_log)
+    write_parse_log(annotator.parse_log,outprefix)
     
-#    write_concepts_to_rdf()
+#    write_concepts_to_rdf(outprefix)
 
 
 

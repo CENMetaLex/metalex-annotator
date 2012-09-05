@@ -3,7 +3,7 @@
 from cornetto.linker import ConceptLinker
 from definition.matcher import DefinitionMatcher
 from util import Util
-from parser import Parser
+from metalex_parser import Parser
 from sys import stdout
 import math
 
@@ -17,6 +17,7 @@ class Annotator():
         self.np_itf = {}
         self.tfidf = {}
         self.definitions = []
+        self.parse_log = {}
         
         
  
@@ -30,6 +31,7 @@ class Annotator():
             concept = entry['concept']
             
             nouns.append(concept)
+            
             for np in nouns :
                 if np in self.np_tf[id].keys() :
                     self.np_tf[id][np] += 1
@@ -124,6 +126,8 @@ class Annotator():
         tagged = self.parser.tagText(tokenized)
         print "Parsing..."
         parsed = self.parser.parseText(tagged)
+        
+        self.parse_log[id] = parsed
         
         stdout.write("Scanning for definitions...")
         dm = DefinitionMatcher()

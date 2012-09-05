@@ -4,7 +4,7 @@ Created on 8 Jun 2011
 
 @author: hoekstra
 '''
-
+import re
 
 class Util:
 
@@ -19,9 +19,13 @@ class Util:
         for node in subtree.leaves()[1:] :
             n += cls.flattenLeaf(node, strip)
         
+
+        
         for (w,t) in subtree.leaves() :
             if t == 'N' and w != n.lstrip():
                 nouns.append(w)
+            
+            
         return n.lstrip(), nouns
     
     @classmethod

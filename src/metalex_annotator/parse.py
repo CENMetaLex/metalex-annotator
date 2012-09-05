@@ -130,7 +130,7 @@ def write_concept_scores(a, outprefix):
         for term in a.tfidf['docs'][doc] :
             nps_writer.writerow([doc_string,term.encode('UTF-8'), a.tfidf['docs'][doc][term]['tc'], locale.str(a.tfidf['docs'][doc][term]['tf']), locale.str(a.tfidf['docs'][doc][term]['idf']), a.tfidf['docs'][doc][term]['max'], locale.str(a.tfidf['docs'][doc][term]['tfidf']), a.tfidf['docs'][doc][term]['dc'], a.tfidf['docs'][doc][term]['ndc']])
             
-    nps_writer = csv.writer(open('docs_by_np.csv', 'wb'), delimiter=';')
+    nps_writer = csv.writer(open(dbnpfn, 'wb'), delimiter=';')
     nps_writer.writerow(['Noun Phrase','Document ID','TC','TF','IDF','MAX TC in Doc','TFIDF','Total Docs','Docs with NP'])
     
     print "Writing to {}".format(dbnpfn)

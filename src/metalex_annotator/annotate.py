@@ -3,7 +3,7 @@
 from cornetto.linker import ConceptLinker
 from definition.matcher import DefinitionMatcher
 from util import Util
-from parser import Parser
+from metalex_parser import Parser
 from sys import stdout
 import math
 

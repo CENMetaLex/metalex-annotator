@@ -14,6 +14,8 @@ import pickle
 import sys
 import regex
 import locale
+from util import Util
+from nltk.tree import Tree
 
 
 
@@ -132,6 +134,18 @@ def write_concept_scores(a):
             nps_writer.writerow([term_string.encode('UTF-8'),doc.encode('UTF-8'), a.tfidf['nps'][term][doc]['tc'], locale.str(a.tfidf['nps'][term][doc]['tf']), locale.str(a.tfidf['nps'][term][doc]['idf']), a.tfidf['nps'][term][doc]['max'], locale.str(a.tfidf['nps'][term][doc]['tfidf']), a.tfidf['nps'][term][doc]['dc'], a.tfidf['nps'][term][doc]['ndc']])
     print "Done"
     
+def write_parse_log(parse_log):
+    parse_log_writer = csv.writer(open('parse_log.csv','wb'), delimiter=';')
+    parse_log_writer.writerow(['Docuent ID','Parsed Text'])
+    
+    print "Writing to parse_log.csv"
+    for doc in parse_log :
+        for tree in parse_log[doc] :
+            ttext = tree.pprint()
+            parse_log_writer.writerow([doc.encode('UTF-8'),ttext.encode('UTF-8')])
+    
+    print "Done"
+    
 def write_concepts_to_rdf():
     cl = ConceptLinker()
     print "Writing to concepts.ttl"
@@ -144,6 +158,7 @@ def process(picklefile):
     
     training_set = pickle.load(open(picklefile,'r'))
     
+    definitions = {}
     indexed_definitions = {}
     for (id,t) in training_set :
         try :
@@ -189,6 +204,8 @@ Licensed under the AGPL v3 (see http://www.gnu.org/licenses/agpl-3.0.txt)
     write_concept_scores(annotator)
     
     write_definition_report(indexed_definitions, definitions)
+    
+    write_parse_log(annotator.parse_log)
     
 #    write_concepts_to_rdf()
 

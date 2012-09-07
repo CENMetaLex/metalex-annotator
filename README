@@ -38,9 +38,10 @@ This is a set of Python scripts for:
 
 
 ====
-# How to get things going:
+# How to get things going (Windows users, look also the notes below):
 
-* Install Python 2.7 for your OS
+* Install Python 2.7 for your OS 
+
 * Install Python setuptools (for easy_install)
 
 * Install rdflib from http://www.rdflib.net
@@ -62,5 +63,20 @@ This is a set of Python scripts for:
 * Initialize a full set and a training and test set
   - Run 'python generate_evaluation_sets.py [path-to-metalex-files]'
   
+* Windows users should also modify the lines configuring the locale in annotator.py. Refer to the comments inside the file.
+
 * Run 'python parse.py --full'
 
+====
+# Further steps, could be necessary for Windows+MinGW
+
+* Install the Python 32bit version for Windows, because of better compatibility with MinGW compiling regex
+
+* Install numby 
+  - (run 'easy_install numby')
+
+* You could have an error installing regex about something like "-mno-cygwin not valid argument"
+  - modify $PYTHON_PATH$/Lib/disutils/cygwincompiler.py and remove -mno-cygwin from the commands placed in the class Mingw32CCompiler
+
+* Set the locale settings to Windows standards
+  - modify parse.py following the comments placed in def write_concept_scores

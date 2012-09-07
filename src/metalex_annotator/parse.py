@@ -117,6 +117,9 @@ def write_definition_report(indexed_definitions, definitions, outprefix):
     
     
 def write_concept_scores(a, outprefix):
+    # for WINDOWS, see on msdn.microsoft.com/en-us/library/hzz3tw78
+    #locale.setlocale(locale.LC_NUMERIC,'nld')
+    # for UNIX/LINUX
     locale.setlocale(locale.LC_NUMERIC,'NL_nl')
     
     npbdfn = "{}_nps_by_doc.csv".format(outprefix)

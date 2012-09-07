@@ -39,10 +39,11 @@ Licensed under the AGPL v3 (see http://www.gnu.org/licenses/agpl-3.0.txt)
     
     
     
-    articles = []
+
     
     for f in list :
         print f
+        articles = []
         try :
             bwbid = re.search("(.*)\..*",f).group(1)
             outfile = "{}.pickle".format(bwbid)
